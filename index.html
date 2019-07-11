@@ -25,6 +25,48 @@
 <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.7.3/jquery-ui.min.js" type="text/javascript"></script>
 <script src="/javascripts/jquery.corner.js?1561467539" type="text/javascript"></script>
 <script src="/javascripts/jquery.blockUI.js?1561467539" type="text/javascript"></script>
+  
+  <style>
+.buttonnyal {
+  display: inline-block;
+  border-radius: 4px;
+  background-color: #ff5660;
+  border: none;
+  color: #ffffff;
+  text-align: center;
+  font-size: 28px;
+  padding: 20px;
+  width: relative;
+  transition: all 0.5s;
+  cursor: pointer;
+  margin: 5px;
+}
+
+.buttonnyal span {
+  cursor: pointer;
+  display: inline-block;
+  position: relative;
+  transition: 0.5s;
+}
+
+.buttonnyal span:after {
+  content: '\00bb';
+  position: absolute;
+  opacity: 0;
+  top: 0;
+  right: -20px;
+  transition: 0.5s;
+}
+
+.buttonnyal:hover span {
+  padding-right: 25px;
+}
+
+.buttonnyal:hover span:after {
+  opacity: 1;
+  right: 0;
+}
+</style>
 
 <script type='text/javascript'>
 $(document).ready(function() {
@@ -473,7 +515,7 @@ this blog post about our
 <ul class='votebox answers row-fluid unstyled'>
 <li class='span5 offset1 leftside'>
 <div class='intro-popover' data-placement='bottom' data-title='Users can vote by clicking one of these options' data-trigger='manual'>
-<button class='btn btn-primary btn-vote btn-vote-idea leftside' data-choice_id='230232' data-choice_url='/planyc_example/choices/230232' data-question_id='3101' data-question_slug='planyc_example' data-side='leftside' id='leftside'>
+<button class='class="buttonnyal" style="vertical-align:middle' data-choice_id='230232' data-choice_url='/planyc_example/choices/230232' data-question_id='3101' data-question_slug='planyc_example' data-side='leftside' id='leftside'>
 Require utility companies to place utility lines underground in the five boroughs.
 </button>
 
@@ -481,7 +523,7 @@ Require utility companies to place utility lines underground in the five borough
 </li>
 <li class='span5 rightside'>
 <div class='intro-popover' data-placement='bottom' data-title='Users can vote by clicking one of these options' data-trigger='manual'>
-<button class='btn btn-primary btn-vote btn-vote-idea rightside' data-choice_id='230035' data-choice_url='/planyc_example/choices/230035' data-question_id='3101' data-question_slug='planyc_example' data-side='rightside' id='rightside'>
+<button class='class="buttonnyal" style="vertical-align:middle' data-choice_id='230035' data-choice_url='/planyc_example/choices/230035' data-question_id='3101' data-question_slug='planyc_example' data-side='rightside' id='rightside'>
 Teach kids about green issues as part of school curriculum
 </button>
 
@@ -513,7 +555,7 @@ Teach kids about green issues as part of school curriculum
 <div class='new_idea_counter'></div>
 </div>
 <div class='pull-right'>
-<button class='btn btn-primary' data-question_id='3101' id='submit_btn'>
+<button class='class="buttonnyal" style="vertical-align:middle' data-question_id='3101' id='submit_btn'>
 Submit
 </button>
 </div>
