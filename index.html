@@ -1,1 +1,707 @@
-heloow world
+
+<!DOCTYPE html>
+<html lang='en' xml:lang='en' xmlns='http://www.w3.org/1999/xhtml'>
+<head>
+<meta content='text/html;charset=UTF-8' http-equiv='content-type' />
+<META NAME="ROBOTS" CONTENT="NOINDEX, NOFOLLOW">
+<meta content='Which do you think is better for creating a greener, greater New York City?' property='og:title' />
+<meta content='https://www.allourideas.org/system/logos/3032/original/planyc.JPG?1358099581' property='og:image' />
+
+<meta name="keywords" content="ideation, online suggestion box, open source suggestion box, crowdsourcing ideas, social suggestion, idea comparison, prioritize ideas, nonprofit, free idea management" />
+<meta content='All Our Ideas is a platform that enables groups to collect and prioritize ideas in a transparent, democratic, and bottom-up way. It’s a suggestion box for the digital age.' name='description' />
+<meta content='All Our Ideas is a platform that enables groups to collect and prioritize ideas in a transparent, democratic, and bottom-up way. It’s a suggestion box for the digital age.' property='og:description' />
+<meta content='https://www.allourideas.org/images/favicon.png?1561467539' property='og:image' />
+<meta content='width=device-width, initial-scale=1.0' name='viewport' />
+<meta property="og:site_name" content="All Our Ideas"/>
+<link href='https://www.allourideas.org/favicon.ico' rel='shortcut icon' />
+<title>All Our Ideas - Bringing survey research into the digital age</title>
+<link href="/stylesheets/glyphicon.css?1561467539" media="screen" rel="stylesheet" type="text/css" />
+<link href="/stylesheets/flexslider/flexslider.css?1561467539" media="screen" rel="stylesheet" type="text/css" />
+<link href="/stylesheets/styles.css?1561467539" media="screen" rel="stylesheet" type="text/css" />
+<link href="/stylesheets/screen.css?1561467539" media="screen" rel="stylesheet" type="text/css" />
+<link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.7.3/themes/ui-lightness/jquery-ui.css" type="text/css" media="all" />
+<link href="/stylesheets/ui.theme.css?1561467539" media="all" rel="stylesheet" type="text/css" />
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js" type="text/javascript"></script>
+<script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.7.3/jquery-ui.min.js" type="text/javascript"></script>
+<script src="/javascripts/jquery.corner.js?1561467539" type="text/javascript"></script>
+<script src="/javascripts/jquery.blockUI.js?1561467539" type="text/javascript"></script>
+
+<script type='text/javascript'>
+$(document).ready(function() {
+$('.request_error').on('hide', function() {
+  window.location.reload(false);
+});
+// Test if we can set and read cookies.
+// If we can't, then the browser probably has 3rd party cookies disabled
+// unless the user has first navigated to the domain serving the iframe source.
+var cookieValue = "cookieTest" + new Date().getTime();
+document.cookie = "cookieTest="+cookieValue;
+if (document.cookie.indexOf("cookieTest="+cookieValue) === -1) {
+  var cookies_failed = document.getElementById('cookies-failed');
+  if (cookies_failed) {
+    cookies_failed.style.display = 'block';
+    var img = new Image();
+    img.src = '/cookies_blocked.gif?question_id=3101&session_id=eabd2f828cb71d98e37e45708150011e&referrer=' + encodeURIComponent(document.referrer);
+  }
+}
+else {
+  // cleanup test cookie
+  document.cookie = 'cookieTest=; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+}
+
+$('.rounded').corner('5px');
+  var loadedTime = new Date();
+  var rootPath = "/";
+
+  handle_history_events = function(event){
+    var left_side_text = $('#left_side_text').val();
+    var right_side_text = $('#right_side_text').val();
+
+    // This only takes effect if the page is loaded from back or forward buttons
+    if(left_side_text && left_side_text != "blank_history" && left_side_text != $('.leftside').html()){
+      $('.leftside').html(left_side_text)
+    }
+    if(right_side_text && right_side_text != "blank_history" && right_side_text != $('.rightside').html()){
+      $('.rightside').html(right_side_text)
+    }
+  }
+
+  handle_history_events();
+
+  $('#the_add_box .new_idea_field').jqEasyCounter({target: '#the_add_box .new_idea_counter'});
+  $('#the_add_box button').hide();
+
+  $('#the_add_box').on('focus', 'textarea', function(ev) {
+    $('#the_add_box button').show();
+    $('#the_add_box .new_idea_counter').show();
+  });
+  $('#the_add_box').on('blur', 'textarea', function(ev) {
+    if ($.trim($(ev.currentTarget).val()).length === 0) {
+      $('#the_add_box button').fadeOut();
+    }
+    $('#the_add_box .new_idea_counter').fadeOut();
+  });
+  // allow enter to add idea
+  $('#the_add_box').on('keypress', 'textarea', function(ev) {
+    $('#the_add_box button').show();
+    if (ev.which == 13) {
+      ev.preventDefault();
+      $('#the_add_box button').click();
+    }
+  });
+
+  // handle submit on add new idea box
+  $('#the_add_box').on('click', 'button', function(ev) {
+    ev.preventDefault();
+    var button = $(ev.currentTarget);
+    button.addClass('disabled');
+    var box = $(ev.delegateTarget);
+    var new_idea = box.find('.new_idea_field').val();
+    var default_text = $('#default_text').val();
+    var question_id = button.data("question_id");
+
+    $('.example_notice').hide();
+
+    // verify new idea is not blank, default or longer than 140 characters
+    if (new_idea == 'Add your own idea here...' || new_idea == '' || new_idea == default_text) {
+      alert('Sorry, blank ideas are not allowed.');
+      return;
+    }
+    if (new_idea.length > 140) {
+      alert('Sorry, ideas need to be less than 140 characters.');
+      return;
+    }
+
+    $('.tellmearea').html('');
+    var data = {authenticity_token : AUTH_TOKEN, new_idea: new_idea, appearance_lookup: $('#appearance_lookup').val()};
+    var url  = rootPath + 'questions/' + question_id + '/add_idea.js?locale=en';
+    $.post(url, data, function(data){
+      button.removeClass('disabled');
+      // keypress is for counter
+      $('#new_idea_field').val('').show().keypress().blur();
+
+      var responseText = '';
+      if (data['choice_status'] == 'active') {
+        responseText = 'Thank you. Your idea has been added. Please add some more ideas.';
+        current_item_count = $('#item_count').html();
+        $('#item_count').html(increment(current_item_count));
+      }
+      else {
+        responseText = 'Your idea has been submitted for review. It will appear soon.';
+      }
+      box.find('.idea-success p').html(responseText);
+      box.find('.idea-success').show();
+      setTimeout(function() {
+        box.find('.idea-success').hide(300);
+      }, 5 * 1000);
+
+    }, "json").fail(showAjaxError);
+  });
+
+
+    // creates new idea vote buttons and slide them in, while
+    // sliding out the old idea vote buttons
+    function loadNewPrompts(data) {
+      var oldLeftDiv = $('.leftside.btn-vote-idea').closest('div');
+      var oldRightDiv = $('.rightside.btn-vote-idea').closest('div');
+      var newLeftDiv = oldLeftDiv.clone(true).hide();
+      var newRightDiv = oldRightDiv.clone(true).hide();
+      var newLeft = newLeftDiv.find('.btn-vote-idea');
+      var newRight = newRightDiv.find('.btn-vote-idea');
+      var bothNew = newLeft.add(newRight);
+
+      bothNew.addClass('btn-primary').removeClass('btn-success');
+
+      newLeft.html(data.newleft);
+      newRight.html(data.newright);
+      newLeft.data('choice_id', data.left_choice_id);
+      newLeft.data('choice_url', data.left_choice_url);
+      newRight.data('choice_id', data.right_choice_id);
+      newRight.data('choice_url', data.right_choice_url);
+
+      newLeftDiv.insertBefore(oldLeftDiv);
+      newRightDiv.insertBefore(oldRightDiv);
+
+      // update can't decide options
+      $('.cd_options .leftside em').html(data.newleft);
+      $('.cd_options .rightside em').html(data.newright);
+
+      //used for fraud detection / back button behavior fixing
+      $('#left_side_text').val(data.newleft);
+      $('#right_side_text').val(data.newright);
+
+      // animation for sliding in / out choices
+      newLeftDiv.add(newRightDiv).slideDown(function() {
+        bothNew.removeClass('disabled');
+      });
+      oldLeftDiv.add(oldRightDiv).slideUp(function() {
+        $(this).remove();
+      });
+    }
+
+    $('.votebox').on('click', '.btn-vote-idea', function(event){
+      event.preventDefault();
+
+      var winningLink = $(event.currentTarget);
+      // return early if disabled or not btn-primary
+      if (!winningLink.not('.disabled').is('.btn-primary')) {
+        return;
+      }
+      var losingLink  = winningLink.closest('.votebox').find('.btn-vote-idea').not(winningLink);
+      var winningSide = winningLink.data('side').replace('side', '');
+
+      winningLink.removeClass('btn-primary').addClass('btn-success').addClass('disabled');
+      losingLink.removeClass('btn-primary').addClass('disabled');
+
+      var currentTime = new Date();
+      var time_viewed = currentTime - loadedTime
+      var the_locale = "en"
+
+
+      var question_id = winningLink.data("question_id");
+
+      var prompt_id = $('#prompt_id').val()
+      var appearance_lookup = $('#appearance_lookup').val()
+      $('.tellmearea').html('');
+
+      $.ajax({
+        type: "post",
+        url: rootPath + 'questions/' + question_id + '/prompts/' + prompt_id + '/vote.js' + '?locale=' + the_locale,
+        dataType: "json",
+        timeout: 10000,
+        data: {
+          'authenticity_token' : AUTH_TOKEN,
+          'time_viewed' : time_viewed,
+          'prompt_id': prompt_id,
+          'appearance_lookup': appearance_lookup,
+          'direction' : winningSide
+        },
+        error: function(request,error) {
+          winningLink.addClass('btn-primary').removeClass('btn-success').removeClass('disabled');
+          losingLink.addClass('btn-primary').removeClass('disabled');
+          showAjaxError(request, error);
+          loadedTime = new Date(); //reset loaded time
+        },
+        success: function(data){
+
+          loadNewPrompts(data);
+
+          $('#prompt_id').val(data["prompt_id"]);
+          $('#appearance_lookup').val(data["appearance_lookup"]);
+
+          current_vote_count = $('#votes_count').html();
+          $('#votes_count').html(increment(current_vote_count));
+
+          loadedTime = new Date(); //reset loaded time
+        }// End success
+      }); // End ajax method
+    });
+
+
+    function showAjaxError(request, error) {
+      if (error == 'error') {
+        if (request.responseText && request.responseText.length > 0) {
+          var response = $.parseJSON(request.responseText);
+          if (response.error == 'CantFindSessionFromCookies') {
+            $('#cookie_request_error').modal('show');
+          }
+          else {
+            $('#unknown_request_error .error-type').html(response.error + '.');
+            $('#unknown_request_error').modal('show');
+          }
+        }
+      }
+      else if (error == 'timeout') {
+        $('#timeout_request_error').modal('show');
+      }
+      else if (error == 'abort') {
+        $('#abort_request_error').modal('show');
+      }
+    }
+
+    // handle can't decide click
+    $('#cant_decide_options').on('click', 'button', function(ev) {
+      ev.preventDefault();
+      var target = $(ev.currentTarget);
+      var reason = target.data('reason');
+      var question_id = target.data("questionid");
+      if (!reason || !question_id) {
+        return;
+      }
+      $('.btn-vote-idea').addClass('disabled');
+      var time_viewed = (new Date()) - loadedTime
+      var prompt_id = $('#prompt_id').val()
+      var appearance_lookup = $('#appearance_lookup').val()
+
+      $('.example_notice').hide();
+      $('.tellmearea').html('');
+      $.blockUI({ message: null, fadeIn: 0, fadeOut:  0, overlayCSS:  {
+          backgroundColor: '#000',
+          opacity:         0.0
+      }});
+
+      var postData = {
+        'authenticity_token' : AUTH_TOKEN,
+        'cant_decide_reason' : reason,
+        'time_viewed' : time_viewed,
+        'appearance_lookup': appearance_lookup
+      };
+      var url = rootPath + 'questions/' + question_id + '/prompts/' + prompt_id + '/skip.js' + '?locale=en';
+      $.post(url, postData, function(data) {
+        $.unblockUI();
+        loadNewPrompts(data);
+
+        $('#prompt_id').val(data["prompt_id"]);
+        $('#appearance_lookup').val(data["appearance_lookup"]);
+        //clear the radio buttons somehow?
+        loadedTime = new Date() //reset loaded time
+      },"json").fail(showAjaxError);
+    });
+
+
+    // handle flag inappropriate clicks
+    // flag_side is used later on submit to determine which choice
+    // is being marked as inappropriate
+    var flag_side = null;
+    $('.flag_link').click(function(ev) {
+      ev.preventDefault();
+      flag_side = $(this).attr('id');
+      $('#flag_inappropriate textarea').val('');
+    });
+
+    $('#flag_inappropriate').on('click', 'button', function(ev) {
+      var user_text = null;
+      user_text = $('#flag_inappropriate textarea').val();
+      if (!user_text) {
+        alert("You must include an explanation");
+        return;
+      }
+      $('#flag_inappropriate').modal('hide');
+
+      var time_viewed = (new Date()) - loadedTime
+      var prompt_id = $('#prompt_id').val();
+      var appearance_lookup = $('#appearance_lookup').val();
+      var question_id = $(ev.currentTarget).data('question_id');
+      $('.btn-vote-idea').addClass('disabled');
+
+      $('.example_notice').hide();
+      $('.tellmearea').html('');
+
+      $.blockUI({ message: null, fadeIn: 0, fadeOut:  0, overlayCSS:  {
+          backgroundColor: '#000',
+          opacity:         0.0
+      }});
+
+      var url = rootPath + 'questions/' + question_id + '/prompts/' + prompt_id + '/flag.js'+ '?locale=en';
+      var postData = {
+        'authenticity_token' : AUTH_TOKEN,
+        'flag_reason' : user_text,
+        'time_viewed' : time_viewed,
+        'side': flag_side,
+        'appearance_lookup': appearance_lookup
+      };
+      $.post(url, postData, function(data) {
+        if (data["error"]) {
+          window.location.replace(data["redirect"]);
+        }
+        else {
+          $.unblockUI();
+
+          loadNewPrompts(data);
+
+          $('#prompt_id').val(data["prompt_id"]);
+          $('#appearance_lookup').val(data["appearance_lookup"]);
+          current_item_count = $('#item_count').html();
+          $('#item_count').html(decrement(current_item_count));
+          loadedTime = new Date() //reset loaded time
+        }
+      }, "json").fail(showAjaxError);
+    });
+
+
+});
+</script>
+</head>
+<script type='text/javascript'>
+  //<![CDATA[
+    $(window).load(function() {
+      // show popover onload
+      $('.intro-popover').tooltip('show');
+      // on any click that's not on a tooltip, hide tooltips
+      $(document).on('click.tooltiphide', function(ev) {
+        if (!$(ev.target).is('.tooltip') && $(ev.target).parents('.tooltip').length === 0) {
+          $('.intro-popover').tooltip('hide');
+          $(document).off('click.tooltiphide');
+        }
+      });
+    });
+  //]]>
+</script>
+<script type='text/javascript'>
+  //<![CDATA[
+    $(document).ready(function() {
+      // Fix for iPhone scale/rotation bug
+      // http://adactio.com/journal/4470/
+      if (navigator.userAgent.match(/iPhone/i) || navigator.userAgent.match(/iPad/i)) {
+        var viewportmeta = document.querySelector('meta[name="viewport"]');
+        if (viewportmeta) {
+          viewportmeta.content = 'width=device-width, minimum-scale=1.0, maximum-scale=1.0';
+          document.body.addEventListener('gesturestart', function() {
+            viewportmeta.content = 'width=device-width, minimum-scale=0.25, maximum-scale=1.6';
+          }, false);
+        }
+        /**
+           * Prevent iOS from zooming onfocus
+           * http://nerd.vasilis.nl/prevent-ios-from-zooming-onfocus/
+           */
+        $('input, select, textarea').bind('focus blur', function(event) {
+        viewportmeta.attr('content', 'width=device-width,initial-scale=1,maximum-scale=' + (event.type == 'blur' ? 10 : 1));
+        });
+      }
+    });
+  //]]>
+</script>
+<body class='en'>
+<div class='navbar navbar-inverse navbar-aoi'>
+<div class='navbar-inner'>
+<button class='btn btn-navbar' data-target='.nav-collapse' data-toggle='collapse'>
+<span class='icon-bar'></span>
+<span class='icon-bar'></span>
+<span class='icon-bar'></span>
+</button>
+<div class='nav-collapse collapse'>
+<ul class='nav pull-right'>
+<li><a href="/sign_in">Log In</a></li>
+</ul>
+</div>
+</div>
+</div>
+<script type="text/javascript">
+//<![CDATA[
+var AUTH_TOKEN = "YYk/sWdairNr9O35SurUIGai5t6obtZWH1LB1ViE8xo=";
+//]]>
+</script>
+<div class='content container-fluid' style=''>
+<div class='body'>
+<div class='row-fluid'>
+<div class='span12'>
+
+</div>
+</div>
+<div class='row-fluid'>
+<div class='span6 survey-image-col'>
+&nbsp;
+<div class='survey-image pull-left'>
+<img alt="Planyc" src="/system/logos/3032/medium/planyc.JPG?1358099581" />
+</div>
+</div>
+</div>
+<div class='row-fluid'>
+<div class='span12'>
+<ul class='nav nav-tabs vote-tabs pull-right'>
+<li class='active'>
+<a href="/planyc_example">Cast Votes</a>
+</li>
+<li class='intro-popover' data-placement='bottom' data-title='Users can view results here' data-trigger='manual'>
+<a href="/planyc_example/results">View Results</a>
+</li>
+<li class=''>
+<a href="/planyc_example/about">About this page</a>
+</li>
+</ul>
+</div>
+</div>
+
+<div class='tab-content question-vote row-fluid'>
+<div id='cookies-failed' style='display: none;'>
+<div>
+<h2>Cookies Blocked</h2>
+<p>
+<a href="http://blog.allourideas.org/post/54515392435/cookies">Cookies are required</a>
+for voting, and it looks like cookies may be disabled in your browser.
+In order to vote, you must allow cookies from allourideas.org. For more information, please read
+this blog post about our
+<a href="http://blog.allourideas.org/post/54515392435/cookies">cookie policy.</a>
+</p>
+</div>
+</div>
+<div class='row-fluid'>
+<div class='span10 offset1'>
+<h2 class='vote-question'>Which do you think is better for creating a greener, greater New York City?</h2>
+</div>
+</div>
+<ul class='votebox answers row-fluid unstyled'>
+<li class='span5 offset1 leftside'>
+<div class='intro-popover' data-placement='bottom' data-title='Users can vote by clicking one of these options' data-trigger='manual'>
+<button class='btn btn-primary btn-vote btn-vote-idea leftside' data-choice_id='230232' data-choice_url='/planyc_example/choices/230232' data-question_id='3101' data-question_slug='planyc_example' data-side='leftside' id='leftside'>
+Require utility companies to place utility lines underground in the five boroughs.
+</button>
+
+</div>
+</li>
+<li class='span5 rightside'>
+<div class='intro-popover' data-placement='bottom' data-title='Users can vote by clicking one of these options' data-trigger='manual'>
+<button class='btn btn-primary btn-vote btn-vote-idea rightside' data-choice_id='230035' data-choice_url='/planyc_example/choices/230035' data-question_id='3101' data-question_slug='planyc_example' data-side='rightside' id='rightside'>
+Teach kids about green issues as part of school curriculum
+</button>
+
+</div>
+</li>
+</ul>
+<div class='row-fluid'>
+<p class='cant-decide'>
+<a href="#cant_decide_options" class="btn span4 offset4" data-toggle="modal" id="cant_decide_btn">I can't decide</a>
+</p>
+<p class='vote_stats'><span id="votes_count">107991</span> votes on <span id="item_count">268</span> ideas
+</p>
+</div>
+<div class='row add-idea-row'>
+<div class='span10 offset1 add_idea'>
+<form action="items_path" method="post"><div style="margin:0;padding:0;display:inline"><input name="authenticity_token" type="hidden" value="YYk/sWdairNr9O35SurUIGai5t6obtZWH1LB1ViE8xo=" /></div>
+<div id='the_add_box'>
+<div class='alert alert-success idea-success hide'>
+<a class='close' data-dismiss='alert' type='button'>&times;</a>
+<p></p>
+</div>
+<p class='add-idea'>
+<textarea class='new_idea_field intro-popover' data-placement='bottom' data-title='Users can add their own ideas here' data-trigger='manual' id='new_idea_field' maxlength='140' name='new_idea' placeholder='Add your own idea here...' rows='2'></textarea>
+</p>
+<input id="default_text" name="default_text" type="hidden" value="Add your own idea here..." />
+<input id="question_id" name="question_id" type="hidden" value="3101" />
+<p>
+<div class='pull-left'>
+<div class='new_idea_counter'></div>
+</div>
+<div class='pull-right'>
+<button class='btn btn-primary' data-question_id='3101' id='submit_btn'>
+Submit
+</button>
+</div>
+</p>
+</div>
+</form>
+
+<div class='tellmearea'></div>
+</div>
+</div>
+</div>
+<div class='request_error hide modal fade' id='cookie_request_error'>
+<div class='modal-header'>
+<button class='close' data-dismiss='modal'>x</button>
+<h2>Error Processing Your Request</h2>
+</div>
+<div class='modal-body'>
+<p>
+There was a problem processing your request. Sometimes this happens when your browser cookies are deleted. When you close this message, the page will reload, and you can try again. If the problem persists, please email
+<a href='mailto:info@allourideas.org'>info@allourideas.org.</a>
+</p>
+</div>
+</div>
+<div class='request_error hide modal fade' id='unknown_request_error'>
+<div class='modal-header'>
+<button class='close' data-dismiss='modal'>x</button>
+<h2>Error Processing Your Request</h2>
+</div>
+<div class='modal-body'>
+<p>
+There was a problem processing your request. The error is of type
+<span class='error-type'>RuntimeError.</span>
+When you close this message, the page will reload, and you can try again. If the problem persists, please email
+<a href='mailto:info@allourideas.org'>info@allourideas.org.</a>
+</p>
+</div>
+</div>
+<div class='request_error hide modal fade' id='timeout_request_error'>
+<div class='modal-header'>
+<button class='close' data-dismiss='modal'>x</button>
+<h2>Error Processing Your Request</h2>
+</div>
+<div class='modal-body'>
+<p>
+There was a problem processing your request. The request timed out while attempting to contact our servers.
+When you close this message, the page will reload, and you can try again. If the problem persists, please email
+<a href='mailto:info@allourideas.org'>info@allourideas.org.</a>
+</p>
+</div>
+</div>
+<div class='request_error hide modal fade' id='abort_request_error'>
+<div class='modal-header'>
+<button class='close' data-dismiss='modal'>x</button>
+<h2>Error Processing Your Request</h2>
+</div>
+<div class='modal-body'>
+<p>
+There was a problem processing your request. The request was cancelled.
+When you close this message, the page will reload, and you can try again. If the problem persists, please email
+<a href='mailto:info@allourideas.org'>info@allourideas.org.</a>
+</p>
+</div>
+</div>
+<div class='hide modal fade' id='cant_decide_options'>
+<div class='modal-header'>
+<button class='close' data-dismiss='modal'>x</button>
+<h2>I can't decide because...</h2>
+</div>
+<div class='modal-body'>
+<div class='row-fluid'>
+<div class='span12'>
+<div class='cd_options'>
+<div class='row-fluid'>
+<div class='span6'>
+<p>
+<button class='btn btn-block btn-primary like_both' data-dismiss='modal' data-questionid='3101' data-reason='like_both'>
+I like both ideas
+</button>
+</p>
+</div>
+<div class='span6'>
+<p>
+<button class='both_same btn btn-block btn-primary' data-dismiss='modal' data-questionid='3101' data-reason='both_same'>
+I think both ideas are the same
+</button>
+</p>
+</div>
+</div>
+<div class='row-fluid'>
+<div class='span6'>
+<p>
+<button class='btn btn-block btn-primary dont_know_both' data-dismiss='modal' data-questionid='3101' data-reason='dont_know_both'>
+I don't know enough about either idea
+</button>
+</p>
+</div>
+<div class='span6'>
+<p>
+<button class='btn btn-block btn-primary dislike_both' data-dismiss='modal' data-questionid='3101' data-reason='dislike_both'>
+I don't like either idea
+</button>
+</p>
+</div>
+</div>
+<div class='row-fluid'>
+<div class='span6'>
+<p>
+<button class='btn btn-block btn-primary dont_know_left' data-dismiss='modal' data-questionid='3101' data-reason='dont_know_left'>
+I don't know enough about:
+<div class='leftside'>
+<em>Require utility companies to place utility lines underground in the five boroughs.</em>
+</div>
+</button>
+</p>
+</div>
+<div class='span6'>
+<p>
+<button class='btn btn-block btn-primary dont_know_right' data-dismiss='modal' data-questionid='3101' data-reason='dont_know_right'>
+I don't know enough about:
+<div class='rightside'>
+<em>Teach kids about green issues as part of school curriculum</em>
+</div>
+</button>
+</p>
+</div>
+</div>
+<div class='row-fluid'>
+<div class='span6'>
+<p>
+<button class='btn btn-block btn-primary other' data-dismiss='modal' data-questionid='3101' data-reason='other'>
+I just can't decide
+</button>
+</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<input id="prompt_id" name="prompt_id" type="hidden" value="11874160" />
+<input id="appearance_lookup" name="appearance_lookup" type="hidden" value="3af188b0d52f8080279059836015272e" />
+<input id="left_side_text" name="left_side_text" type="hidden" value="blank_history" />
+<input id="right_side_text" name="right_side_text" type="hidden" value="blank_history" />
+
+</div>
+</div>
+<div class='footer'>
+<div class='row-fluid'>
+<div class='span9'>
+</div>
+<div class='span3'>
+<div class='footer-right pull-right'>
+<p>
+<a href="/" class="powered-by">Powered by All Our Ideas</a>
+</p>
+<p>
+<a href="/about">About</a>
+<br />
+<a href="/privacy">Privacy and Consent Policy</a>
+</p>
+</div>
+</div>
+</div>
+</div>
+
+<script src="/javascripts/jquery.ba-url.min.js?1561467539" type="text/javascript"></script>
+<script src="/javascripts/jquery.taconite.js?1561467539" type="text/javascript"></script>
+<script src="/javascripts/jquery.hint.js?1561467539" type="text/javascript"></script>
+<script src="/javascripts/label_over.js?1561467539" type="text/javascript"></script>
+<script src="/javascripts/jquery.jqEasyCharCounter.js?1561467539" type="text/javascript"></script>
+<script src="/javascripts/application.js?1561467539" type="text/javascript"></script>
+<script src="/javascripts/jquery.form.js?1561467539" type="text/javascript"></script>
+<script src="/javascripts/bootstrap/bootstrap.min.js?1561467539" type="text/javascript"></script>
+<script src="/javascripts/retina.js?1561467539" type="text/javascript"></script>
+<script type='text/javascript'>
+var _gaq = _gaq || [];
+_gaq.push(['_setAccount', 'UA-11703548-1']);
+_gaq.push(['_trackPageview']);
+</script>
+<script type='text/javascript'>
+  //<![CDATA[
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  //]]>
+</script>
+</body>
+</html>
